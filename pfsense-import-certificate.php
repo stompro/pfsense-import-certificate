@@ -82,7 +82,6 @@ foreach ($a_cert as $existing_cert) {
 	}
 }
 
-
 // Append the final certificate
 $a_cert[] = $cert;
 
@@ -109,6 +108,14 @@ foreach ($config['captiveportal'] as $cpid => $cportal) {
   }
 }
 
+// If haproxy is set to offload ssl, then set the new certificate
+foreach ($config['installedpackages']['haproxy']['ha_backends']['item'] as $itemid => $haitem) {
+  if(isset($haitem['ssloffloadacl_an'])) {
+    $name = $haitem['name'];
+    echo "Updating HAProxy certificate for backend: $name\r\n";
+    $config['installedpackages']['haproxy']['ha_backends']['item'][$itemid]['ssloffloadcert'] = $cert['refid'];
+  }
+}
 
 write_config("Set new certificate as active for webgui, from pfsense-import-certificate.php");
 sleep(3); //sleep to space out the write_config calls
